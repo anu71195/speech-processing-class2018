@@ -4,31 +4,42 @@ print (file)
 indexx=0;
 start=0;
 count=0;
-window=27000;
+window=10000;
 end=start+window;
 threshold=4000;
+complete=0;
 data=[];
 flag=0;
 for line in file:
 	data.append(int(line.split('\n')[0]));
-while(1)	:
-	start=end;
-	end=start+window;
-	if(end>=len(data)-1):
-		break;
-	for i in range(start,end+1):
+while(1):
+	for i in range(start,len(data)+1):
 		if(data[i]>threshold):
-			flag=1;
-			count+=1;
-			fw=open(filename+str(count),"w")
-			for j in range(start,end+1):
-				fw.write(str(data[j]))
-				fw.write("\n");
+			first_high=i;
+			last_high=i;
+			start=first_high+1;
 			break;
+	while (1):
+		if(start+window >=len(data)):
+			complete=1;
+			break;
+		for i in range(start,start+window):
+			if(data[i]>threshold):
+				last_high=i;
+				flag=1;
+		start=last_high+1;
+		if(flag==0):
+			break;
+		flag=0;
+	fw=open(filename+str(count+1),"w")
+	for i in range(first_high,last_high+1):
+		fw.write(str(data[i]));
+		fw.write("\n");
 
-	# if (flag):
-		# flag=0;
-		# continue;
-	# count+=1;
+	count+=1;
+
+	if(complete):
+		break;
+print(count);
 	
-print(count)
+
