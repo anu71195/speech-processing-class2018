@@ -31,8 +31,8 @@ while(1):
 		if(flag==0):
 			break;
 		flag=0;
-	fw=open(filename+str(count+1),"w")
-	for i in range(first_high,last_high+1):
+	fw=open(filename+str(count+1)+".txt","w")
+	for i in range(first_high-int(window/10),last_high+int(window/10)):
 		fw.write(str(data[i]));
 		fw.write("\n");
 
