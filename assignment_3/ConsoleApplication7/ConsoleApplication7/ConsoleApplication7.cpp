@@ -102,9 +102,9 @@ vector <long long int> find_zcr(string filename)
 	return store_return;
 
 }
-vector<int> train(string filename)
+vector<long long int> train(string filename)
 {
-	vector<int> zcr_output;
+	vector<long long int> zcr_output;
 	long long int zcr1 = 0, zcr6 = 0, zcr, energy;
 	vector <long long int>en_zcr;
 	for (int i = 0; i<10; i++)
@@ -129,21 +129,29 @@ vector<int> train(string filename)
 }
 int _tmain(int argc, _TCHAR* argv[])
 {
+	
+	cout << "training to find zcr for 1 and 6..."<<endl;
+	cout << "files for training are in the location \"./data/\""<<endl;
 	string filename = "data/150101010_";
 	ofstream ofs;
-	ifstream ifs;
-	vector<int> vec_zcr;
-	vector<long long int> en_zcr;
-	string a;
-	int zcr,zcr1,zcr6;
+	ifstream inFile;
+	vector<long long int> en_zcr,vec_zcr;
+	long long int zcr,zcr1,zcr6;
 	vec_zcr=train(filename);
 	ofs.open("zcr.txt");
 	ofs << to_string(vec_zcr[0])+"\n"+to_string(vec_zcr[1]);
 	zcr1 = vec_zcr[0];
 	zcr6 = vec_zcr[1];
-	 
-	en_zcr = find_zcr("data/150101010_1_1.txt");
+	cout << "average zcr1 = " << zcr1 << endl;
+	cout << "average zcr6 = " << zcr6 << endl<<endl;
+	cout << "the same above value for average zcr of 1 and 6 are stored in the file zcr.txt in the same directory" << endl;
+	cout << "NOTE:- It is expected that input at the beginning and ending has ambient sound" << endl << endl;
+	cout << "Give the path to the file of the sound  to be classified with respect to the current directory:- ";
+	cin >> filename;
+	cout << endl;
+	en_zcr = find_zcr(filename);
 	zcr = en_zcr[0];
-	if (abs(zcr - vec_zcr[0])>abs(zcr - vec_zcr[1]))cout << "the sound is of 6" << endl;
-	else cout << "the sound is of 1" << endl;
+	cout << "zcr of the file given is :- " << zcr << endl;
+	if (abs(zcr - vec_zcr[0])>abs(zcr - vec_zcr[1]))cout << "the sound classified is of 6" << endl<<endl;
+	else cout << "the sound is of 1" << endl<<endl;
 }
