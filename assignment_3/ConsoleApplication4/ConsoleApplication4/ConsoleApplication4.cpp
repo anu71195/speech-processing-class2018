@@ -32,7 +32,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	vector <int> store_temp;
 	//file format somethingi_j.txt where i and j digit and its iteration number something part must be given in filename;see number_of_iterations variable
 	int  countp = 0, countn = 0, bitspersample = 16, channels = 1, samplerate = 16000, normalized = 0, number_of_iterations = 10, ambient_sound_average = 0, a = 0, b = 0,max=0,min=INT_MAX;
-	int amplitude = 5000,threshold,first_high,last_high,zcr=0,zcr1,zcr6;
+	int amplitude = 5000,threshold,first_high,last_high,zcr=0,zcr1,zcr6,samples=1000;
 	//number of iterations which represents j
 	inFile=open_file("data/ambient_sound.txt");
 	while (!inFile.eof())
@@ -97,9 +97,20 @@ int _tmain(int argc, _TCHAR* argv[])
 		for (int j = first_high ; j < last_high ; j++)
 		{
 			update_store_temp.push_back(store_temp[j]);
-			if (store_temp[j] * store_temp[j - 1] <= 0)current_zcr++;
+			//if (store_temp[j] * store_temp[j - 1] <= 0)current_zcr++;
 		}
-		zcr += current_zcr;
+		int cur_zcr = 0,frequency=0;
+		for (int j = first_high; j < last_high ; j++)
+		{
+			if (store_temp[j] * store_temp[j - 1] <= 0)current_zcr++;
+			if (j%samples == 0)
+			{
+				frequency++;
+				cur_zcr += current_zcr;
+				current_zcr = 0;
+			}
+		}
+		zcr += cur_zcr/frequency;
 		store.push_back(update_store_temp);
 		cout << "zcr is"<<zcr /(i+1)<< endl;
 		store_temp.clear();
@@ -111,7 +122,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	store_temp.clear();
 	store.clear();
 	zcr = 0;
-
+	cout << endl;
 	//reading files of 6 at a time and storing dc shift value in the store variable;
 	for (int i = 0; i<10; i++)
 	{
@@ -157,9 +168,20 @@ int _tmain(int argc, _TCHAR* argv[])
 		for (int j = first_high; j < last_high; j++)
 		{
 			update_store_temp.push_back(store_temp[j]);
-			if (store_temp[j] * store_temp[j - 1] <= 0)current_zcr++;
+			
 		}
-		zcr += current_zcr;
+		int cur_zcr = 0, frequency = 0;
+		for (int j = first_high; j < last_high; j++)
+		{
+			if (store_temp[j] * store_temp[j - 1] <= 0)current_zcr++;
+			if (j%samples == 0)
+			{
+				frequency++;
+				cur_zcr += current_zcr;
+				current_zcr = 0;
+			}
+		}
+		zcr += cur_zcr / frequency;
 		store.push_back(update_store_temp);
 		cout << "zcr is" << zcr / (i + 1) << endl;
 		store_temp.clear();
