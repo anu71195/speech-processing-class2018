@@ -118,7 +118,6 @@ vector<int> train(string filename)
 	{
 		en_zcr = find_zcr(filename + "6_" + to_string(i + 1) + ".txt");
 		zcr6 += en_zcr[0];
- 
 	}
 	zcr1 = zcr1 / 10;
 	zcr6 = zcr6 / 10;
@@ -131,10 +130,18 @@ vector<int> train(string filename)
 int _tmain(int argc, _TCHAR* argv[])
 {
 	string filename = "data/150101010_";
+	ofstream ofs;
+	ifstream ifs;
 	vector<int> vec_zcr;
 	vector<long long int> en_zcr;
-	int zcr;
+	string a;
+	int zcr,zcr1,zcr6;
 	vec_zcr=train(filename);
+	ofs.open("zcr.txt");
+	ofs << to_string(vec_zcr[0])+"\n"+to_string(vec_zcr[1]);
+	zcr1 = vec_zcr[0];
+	zcr6 = vec_zcr[1];
+	 
 	en_zcr = find_zcr("data/150101010_1_1.txt");
 	zcr = en_zcr[0];
 	if (abs(zcr - vec_zcr[0])>abs(zcr - vec_zcr[1]))cout << "the sound is of 6" << endl;
