@@ -50,7 +50,7 @@ vector <long long int> find_zcr(string filename)
 	}
 	a = a / counta;
 	b = b / countb;
-	
+	 
 	threshold = 2 * abs_max(a, b);
 	for (int i = 0; i < store.size(); i++)
 	{
@@ -104,21 +104,24 @@ vector <long long int> find_zcr(string filename)
 }
 int _tmain(int argc, _TCHAR* argv[])
 {
-	long long int zcr1 = 108, zcr6 = 202, zcr,energy;
+	long long int zcr1 = 59, zcr6 = 105, zcr,energy;
 	vector <long long int>en_zcr;
 	string filename = "data/150101010_";
 	for (int i = 0; i<10; i++)
 	{
 		en_zcr = find_zcr(filename + "1_" + to_string(i + 1) + ".txt");
-		cout << en_zcr[0] << " " << en_zcr[1] << endl;
+		zcr = en_zcr[0];
+		if (abs(zcr - zcr1)>abs(zcr - zcr6))cout << "the sound is of 6" << endl;
+		else cout << "the sound is of 1" << endl;
 	}
 	nl;
 	for (int i = 0; i<10; i++)
 	{
 		en_zcr = find_zcr(filename + "6_" + to_string(i + 1) + ".txt");
-		cout << en_zcr[0] << " " << en_zcr[1] << endl;
+		zcr = en_zcr[0];
+		if (abs(zcr - zcr1)>abs(zcr - zcr6))cout << "the sound is of 6" << endl;
+		else cout << "the sound is of 1" << endl;
 	}
-	zcr = en_zcr[0], energy = en_zcr[1];
-	if (abs(zcr - zcr1)>abs(zcr - zcr6))cout << "the sound is of 6"<<endl;
-	else cout << "the sound is of 1"<<endl;
+
+
 }

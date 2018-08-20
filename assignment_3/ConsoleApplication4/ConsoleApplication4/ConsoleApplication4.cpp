@@ -68,6 +68,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			store_temp.push_back(item);
 		}
 		threshold = (int)(2 * ((float)abs_max(a, b)*(float)5000 / (float)abs_max(max, min)));
+		cout << "threshold is" << threshold << endl;
 		for (int j = 0; j < store_temp.size(); j++)//normalizing each file between -amplitude and +amplitude;
 		{
 			if (store_temp[j]>0)store_temp[j] = (int)(amplitude*((float)store_temp[j] /(float) max));
@@ -139,6 +140,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			store_temp.push_back(item);
 		}
 		threshold = (int)(2 * ((float)abs_max(a, b)*(float)5000 / (float)abs_max(max, min)));
+		cout << "threshold is" << threshold << endl;
 		for (int j = 0; j < store_temp.size(); j++)//normalizing each file between -amplitude and +amplitude;
 		{
 			if (store_temp[j]>0)store_temp[j] = (int)(amplitude*((float)store_temp[j] / (float)max));
@@ -190,7 +192,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	zcr6 = zcr;
 	cout << "zcr 1 and 6 are " << endl;
 	cout << zcr1 << " " << zcr6 << endl;
-
+	cout << a << " " << b << endl;
 
 	return 0;
 }
