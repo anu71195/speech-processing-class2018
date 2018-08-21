@@ -128,6 +128,7 @@ vector<long long int> train(string filename)//train the system to find the avera
 void record_sound()
 {
 	cout << "NOTE:- It is expected that input at the beginning and ending has ambient sound of about 1 second" << endl << endl;
+	cout<<"The output of the recorded sound will be stored in out.wav and out.txt for sound and its numerical samples respectively"<<endl<<endl;
 	system("Recording_Module.exe 3 out.wav out.txt");
 }
 int _tmain(int argc, _TCHAR* argv[])
