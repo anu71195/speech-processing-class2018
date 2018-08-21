@@ -1,0 +1,83 @@
+[33mcommit a243753fa42a3b59c6d3db5bd61d5b7488c53b73[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: anu <anu71195@gmail.com>
+Date:   Mon Aug 20 16:27:33 2018 +0530
+
+    cleaning and commenting
+
+[33mcommit 57b1f160345b428bfbf44e075d27c5a89ce98aa0[m
+Author: anu <anu71195@gmail.com>
+Date:   Mon Aug 20 16:15:14 2018 +0530
+
+    made a command line interface for the problem statement in assignment 3 in console application 7
+
+[33mcommit fc0323b4255b70a77e6f4ce2c5382be1ba036bff[m
+Author: anu <anu71195@gmail.com>
+Date:   Mon Aug 20 15:50:19 2018 +0530
+
+    merging and a bit cleaning in console application 7 in assignment 3
+
+[33mcommit 834c52652af3ca782271debaf9dff9526c1bc7fe[m
+Author: anu <anu71195@gmail.com>
+Date:   Mon Aug 20 15:33:12 2018 +0530
+
+    console application 7 has the merged training and testing for assignment 3
+
+[33mcommit 609b39368e44f8d852bade90d58e884d276b6fa2[m
+Author: anu <anu71195@gmail.com>
+Date:   Mon Aug 20 15:18:02 2018 +0530
+
+    in assignment 3 console application 5 and 6 are giving out 19/20 accuracy where console application 6 is the training
+
+[33mcommit c00a458d154fe3d3aa27a7d5eecc792f946aed9d[m
+Author: anu <anu71195@gmail.com>
+Date:   Mon Aug 20 14:39:41 2018 +0530
+
+    values for 1 and 6 are coming pretty distinct but the value getting from train and test are different
+
+[33mcommit 5b3093a829abff8fe604d911b787f7e6ebcad0bd[m
+Author: anu <anu71195@gmail.com>
+Date:   Mon Aug 20 12:23:35 2018 +0530
+
+    made code first sight checking and corrections if there are still there
+
+[33mcommit 41cd0b1ac7da3fef68fd5c818e7472754b96327a[m
+Author: anu <anu71195@gmail.com>
+Date:   Mon Aug 20 09:55:33 2018 +0530
+
+    in assignment 3 made the read file code
+
+[33mcommit 4e83ab199130b0cb3f85f01d78e1012c5d4db082[m
+Author: anu <anu71195@gmail.com>
+Date:   Thu Aug 16 02:10:47 2018 +0530
+
+    assignment 2 done
+
+[33mcommit 530f213d625bea90cf01994bfc6b14477154009d[m
+Author: anu <anu71195@gmail.com>
+Date:   Thu Aug 16 02:05:48 2018 +0530
+
+    updated split code for the naming convention
+
+[33mcommit a250f1ee90c95b4f5c758fc158ed295d771f5711[m
+Author: anu <anu71195@gmail.com>
+Date:   Thu Aug 16 01:55:03 2018 +0530
+
+     updated code for split
+
+[33mcommit 0d3c050bda9c6b5b7057a5bd415067d44b8e6461[m
+Author: anu <anu71195@gmail.com>
+Date:   Thu Aug 16 01:47:12 2018 +0530
+
+     updated code for split
+
+[33mcommit c10a42659cfb964ecefddd5efb5cf48d92880956[m
+Author: anu <anu71195@gmail.com>
+Date:   Thu Aug 16 01:43:48 2018 +0530
+
+     updated code for split
+
+[33mcommit 1c54aae66744523820080cdb46ec16fd7faf5631[m
+Author: Anu <anu71195@gmail.com>
+Date:   Wed Aug 15 06:33:47 2018 +0530
+
+    data and split file in progress
