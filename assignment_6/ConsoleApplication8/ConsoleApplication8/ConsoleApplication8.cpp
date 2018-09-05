@@ -25,6 +25,22 @@ ifstream open_file(string filepath)//open the file with given filepath and retur
 	}
 	return inFile;
 }
+void store_values(vector<vector <double> >input,string filename)
+{
+	ofstream ofs;
+	ofs.open(filename);
+	for (int i = 0; i < input.size(); i++)
+	{
+		for (int j = 0; j < input[i].size(); j++)
+		{
+			ofs << to_string(input[i][j]) + " ";
+		}
+		ofs << endl;
+	}
+	
+
+
+}
 vector<double> get_Ris(vector<double>signals, long long int p)//gets the Ris from the signals
 {
 	vector<double> Ri;
@@ -80,7 +96,7 @@ vector<double> get_ais(vector<double>signals, long long int p)//phi(k)=R(k)=summ
 vector<double> dc_shift_normalize_vac(vector<double> data)//dc shift then voice activity detection and then normalize
 {
 	vector<double> store_temp;
-	double a = 0, b = 0, counta = 0, countb = 0, dc_shift_bound = 1000, threshold, first_high, last_high, max_v = INT_MIN, min_v = INT_MAX, amplitude=5000;
+	double a = 0, b = 0, counta = 0, countb = 0, dc_shift_bound = 1000, threshold, first_high, last_high, max_v = INT_MIN, min_v = INT_MAX, amplitude=1;
 	for (int i = 0; i < data.size(); i++)//finding the ambient sound for positive side and negative of the signals only at the beginning and ending of the signal (dc_shift_bound number of samples on both sides)
 	{
 		if (data[i] < 0 && (i <= dc_shift_bound || i >= (data.size() - dc_shift_bound)))
@@ -136,7 +152,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	long long int item,p=12;
 	string folder_path = "vowel_data",filepath;
 	vector <string> vowels = { "a", "e", "i", "o", "u" };//all the vowels stored in the vector vowels
-	vector <double> data;
+	vector <double> data,ai;
+	vector<vector <double> >all_ais;
 	for (long long int i = 0; i < 1; i++)
 	{
 		for (long long int j = 0; j < vowels.size(); j++)
@@ -152,11 +169,14 @@ int _tmain(int argc, _TCHAR* argv[])
 				
 			}
 			data=dc_shift_normalize_vac(data);
-			get_ais(data, p);
+			ai=get_ais(data, p);
+			all_ais.push_back(ai);
 			data.clear();
 		}
-				
+		
 	}
+	store_values(all_ais, "Ai.txt");
+
 	return 0;
 }
 
