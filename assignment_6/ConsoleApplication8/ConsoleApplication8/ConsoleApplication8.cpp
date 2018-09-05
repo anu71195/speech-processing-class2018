@@ -59,11 +59,11 @@ vector<double> get_Ris(vector<double>signals, long long int p)//gets the Ris fro
 	return Ri;
 	
 }
-vector<double> get_ais(vector<double>signals, long long int p)//phi(k)=R(k)=summationo_over_all_samples(signals(n)*s(n+k)) where n is the sample number
+vector<double> get_ais(vector<double>signals, vector<double> Ri,long long int p)//phi(k)=R(k)=summationo_over_all_samples(signals(n)*s(n+k)) where n is the sample number
 {
-	vector<double>ai(p + 1, 0), Ri, E(p + 1, 0), k, bi;
+	vector<double>ai(p + 1, 0), E(p + 1, 0), k, bi;
 	double value;
-	Ri=get_Ris(signals,p);//gets the Ris from the signals and store in the vector Ri;
+	
 	E[0]=Ri[0];
 	k.push_back(-1);//k[0] is invalid
 	bi = ai;
@@ -92,6 +92,35 @@ vector<double> get_ais(vector<double>signals, long long int p)//phi(k)=R(k)=summ
 	cout << endl;
 	
 	return ai;
+}
+double get_gain_square(vector<double> Ri,vector<double>  ai,int p)
+{
+	double G2=Ri[0];
+	for (int i = 1; i <= p; i++)
+	{
+		G2 -= ai[1] * Ri[1];
+	}
+	return G2;
+	
+}
+vector <double> get_cis(vector<double> ai, vector<double> Ri, double G2,int p)
+{
+	vector<double>ci(p+1,0);
+	double value;
+	ci[0] = log(G2);
+	for (int i = 1; i <= p; i++)
+	{
+		value = 0;
+		for (int j = 1; j < i; j++)
+		{
+			value += ((double)j / (double)i)*ci[j] * ai[i - j];
+		}
+		ci[i] = ai[i] + value;
+	}
+	for (int i = 0; i < ci.size(); i++)cout << ci[i] << " ";
+	cout << endl;
+	return ci;
+
 }
 vector<double> dc_shift_normalize_vac(vector<double> data)//dc shift then voice activity detection and then normalize
 {
@@ -150,10 +179,11 @@ int _tmain(int argc, _TCHAR* argv[])
 	ifstream infile;
 	ofstream ofs;
 	long long int item,p=12;
+	double G2;
 	string folder_path = "vowel_data",filepath;
 	vector <string> vowels = { "a", "e", "i", "o", "u" };//all the vowels stored in the vector vowels
-	vector <double> data,ai;
-	vector<vector <double> >all_ais;
+	vector <double> data,ai,ci,Ri;
+	vector<vector <double> >all_ais,all_cis;
 	for (long long int i = 0; i < 1; i++)
 	{
 		for (long long int j = 0; j < vowels.size(); j++)
@@ -169,13 +199,18 @@ int _tmain(int argc, _TCHAR* argv[])
 				
 			}
 			data=dc_shift_normalize_vac(data);
-			ai=get_ais(data, p);
+			Ri = get_Ris(data, p);//gets the Ris from the signals and store in the vector Ri;
+			ai=get_ais(data, Ri,p);
+			G2 = get_gain_square(Ri,ai,p);
+			ci = get_cis(ai, Ri, G2,p);
 			all_ais.push_back(ai);
+			all_cis.push_back(ci);
 			data.clear();
 		}
 		
 	}
 	store_values(all_ais, "Ai.txt");
+	store_values(all_cis, "Ci.txt");
 
 	return 0;
 }
