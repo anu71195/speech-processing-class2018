@@ -9,6 +9,11 @@
 #define nl cout<<endl;
 using namespace std;
 
+double abs_max(double a, double b)//return the value of absolute max of given parameters;
+{
+	if (abs(a) > abs(b))return abs(a);
+	return abs(b);
+}
 ifstream open_file(string filepath)//open the file with given filepath and returns the file handle
 {
 	ifstream inFile;
@@ -72,7 +77,58 @@ vector<double> get_ais(vector<double>signals, long long int p)//phi(k)=R(k)=summ
 	
 	return ai;
 }
-
+vector<double> dc_shift_normalize_vac(vector<double> data)//dc shift then voice activity detection and then normalize
+{
+	vector<double> store_temp;
+	double a = 0, b = 0, counta = 0, countb = 0, dc_shift_bound = 1000, threshold, first_high, last_high, max_v = INT_MIN, min_v = INT_MAX, amplitude=5000;
+	for (int i = 0; i < data.size(); i++)//finding the ambient sound for positive side and negative of the signals only at the beginning and ending of the signal (dc_shift_bound number of samples on both sides)
+	{
+		if (data[i] < 0 && (i <= dc_shift_bound || i >= (data.size() - dc_shift_bound)))
+		{
+			a += data[i];
+			counta++;
+		}
+		else if (data[i]>0 && (i <= dc_shift_bound || i >= (data.size() - dc_shift_bound)))
+		{
+			b += data[i];
+			countb++;
+		}
+	}
+	a = a / counta;//average ambient sound for positive and negative sides
+	b = b / countb;
+	threshold = 2 * abs_max(a, b);//defining threshold with the help of average ambient sound for positive and negative sides
+	for (int i = 0; i < data.size(); i++)//getting the first index of the input signal where the value is greater than threshold
+	{
+		if (data[i]>threshold)
+		{
+			first_high = i;
+			break;
+		}
+	}
+	for (int i = data.size() - 1; i >= 0; i--)//getting the last index of the input signal where the value is greater than threshold
+	{
+		if (data[i] > threshold)
+		{
+			last_high = i;
+			break;
+		}
+	}
+	//the first and last index where the values are greater than threshold are stored in first_high and last_high variable;
+	for (int i = first_high; i <= last_high; i++)//removing ambient sound i.e. taking values between first high and last high  and dc shift i.e. subtracting average ambient sound on positive and negative side of the signals and finally storing in store_temp
+	{
+		if (data[i]>0)		store_temp.push_back(data[i] - a);
+		else store_temp.push_back(data[i] - b);
+		if (store_temp[store_temp.size() - 1] > max_v)max_v = store_temp[store_temp.size() - 1];
+		if (store_temp[store_temp.size() - 1] < min_v)min_v = store_temp[store_temp.size() - 1];
+	}
+	for (int i = 0; i < store_temp.size(); i++)//normalize between -A and +A amplitude
+	{
+		if (store_temp[i]>0)store_temp[i] = (amplitude*((double)store_temp[i] / (double)max_v));
+		else store_temp[i] =  (-amplitude*((double)store_temp[i] / (double)min_v));
+	}
+	data = store_temp;
+	return data;
+}
 int _tmain(int argc, _TCHAR* argv[])
 {
 	ifstream infile;
@@ -95,6 +151,7 @@ int _tmain(int argc, _TCHAR* argv[])
 				data.push_back(item);
 				
 			}
+			data=dc_shift_normalize_vac(data);
 			get_ais(data, p);
 			data.clear();
 		}
