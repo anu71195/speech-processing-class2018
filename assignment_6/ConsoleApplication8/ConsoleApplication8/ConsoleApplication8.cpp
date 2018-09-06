@@ -6,6 +6,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <cmath>
 #define nl cout<<endl;
 using namespace std;
 
@@ -37,9 +38,16 @@ void store_values(vector<vector <double> >input,string filename)
 		}
 		ofs << endl;
 	}
-	
 
-
+}
+vector<double>hamming_window(vector<double>signals)
+{
+	double pi = 3.14159265358979323846;
+	for (int i = 0; i < signals.size(); i++)
+	{
+		signals[i] = signals[i] * (0.54-0.46*cos(2*pi*(i/(signals.size()-1))));
+	}
+	return signals;
 }
 vector<double> get_Ris(vector<double>signals, long long int p)//gets the Ris from the signals
 {
@@ -98,7 +106,7 @@ double get_gain_square(vector<double> Ri,vector<double>  ai,int p)
 	double G2=Ri[0];
 	for (int i = 1; i <= p; i++)
 	{
-		G2 -= ai[1] * Ri[1];
+//		G2 -= ai[1] * Ri[1];  //???????????????????????
 	}
 	return G2;
 	
@@ -108,6 +116,7 @@ vector <double> get_cis(vector<double> ai, vector<double> Ri, double G2,int p)
 	vector<double>ci(p+1,0);
 	double value;
 	ci[0] = log(G2);
+	cout << " c0 is " << ci[0] << endl;
 	for (int i = 1; i <= p; i++)
 	{
 		value = 0;
@@ -117,7 +126,6 @@ vector <double> get_cis(vector<double> ai, vector<double> Ri, double G2,int p)
 		}
 		ci[i] = ai[i] + value;
 	}
-	for (int i = 0; i < ci.size(); i++)cout << ci[i] << " ";
 	cout << endl;
 	return ci;
 
@@ -125,7 +133,7 @@ vector <double> get_cis(vector<double> ai, vector<double> Ri, double G2,int p)
 vector<double> dc_shift_normalize_vac(vector<double> data)//dc shift then voice activity detection and then normalize
 {
 	vector<double> store_temp;
-	double a = 0, b = 0, counta = 0, countb = 0, dc_shift_bound = 1000, threshold, first_high, last_high, max_v = INT_MIN, min_v = INT_MAX, amplitude=1;
+	double a = 0, b = 0, counta = 0, countb = 0, dc_shift_bound = 1000, threshold, first_high, last_high, max_v = INT_MIN, min_v = INT_MAX, amplitude=10;
 	for (int i = 0; i < data.size(); i++)//finding the ambient sound for positive side and negative of the signals only at the beginning and ending of the signal (dc_shift_bound number of samples on both sides)
 	{
 		if (data[i] < 0 && (i <= dc_shift_bound || i >= (data.size() - dc_shift_bound)))
@@ -178,39 +186,56 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	ifstream infile;
 	ofstream ofs;
-	long long int item,p=12;
+	long long int item,p=12,num_samples=320;
 	double G2;
-	string folder_path = "vowel_data",filepath;
+	string folder_path = "vowel_data",filepath,s_filename;//store filename=s_filename
 	vector <string> vowels = { "a", "e", "i", "o", "u" };//all the vowels stored in the vector vowels
-	vector <double> data,ai,ci,Ri;
-	vector<vector <double> >all_ais,all_cis;
+	vector <double> data,ai,ci,Ri,all_data;
+	vector<vector <double> >all_ais,all_cis,all_Ris;
 	for (long long int i = 0; i < 1; i++)
 	{
 		for (long long int j = 0; j < vowels.size(); j++)
 		{
 			filepath = folder_path + "/150101010_" + vowels[j] + "_" + to_string(i + 1) + ".txt";
-			infile=open_file(filepath);
+			infile = open_file(filepath);
 			cout << filepath << endl;
 			while (!infile.eof())//storing input file in store vector
 			{
-				
+
 				infile >> item;
 				data.push_back(item);
-				
+
 			}
-			data=dc_shift_normalize_vac(data);
-			Ri = get_Ris(data, p);//gets the Ris from the signals and store in the vector Ri;
-			ai=get_ais(data, Ri,p);
-			G2 = get_gain_square(Ri,ai,p);
-			ci = get_cis(ai, Ri, G2,p);
-			all_ais.push_back(ai);
-			all_cis.push_back(ci);
-			data.clear();
+			all_data = dc_shift_normalize_vac(data);
+			for (int k = 0; k < 5; k++)
+			{
+				data.assign(all_data.begin() + k * 25 * num_samples / 100, all_data.begin() + k * 25 * num_samples / 100+num_samples);
+				data = hamming_window(data);
+				Ri = get_Ris(data, p);//gets the Ris from the signals and store in the vector Ri;
+				for (int i = 0; i < Ri.size(); i++)cout << "Ri:" << Ri[i] << "\t";
+				cout << endl;
+				ai = get_ais(data, Ri, p);
+				G2 = get_gain_square(Ri, ai, p);
+				ci = get_cis(ai, Ri, G2, p);
+				all_ais.push_back(ai);
+				all_cis.push_back(ci);
+				all_Ris.push_back(Ri);
+
+				data.clear();
+			}
+			s_filename = "Ai_" + vowels[j] + "_.txt";
+			store_values(all_ais, s_filename);
+			s_filename = "Ci_" + vowels[j] + "_.txt";
+			store_values(all_cis, s_filename);
+			s_filename = "Ri_" + vowels[j] + "_.txt";
+			store_values(all_Ris, s_filename);
+			all_data.clear();
+			all_ais.clear();
+			all_cis.clear();
 		}
 		
 	}
-	store_values(all_ais, "Ai.txt");
-	store_values(all_cis, "Ci.txt");
+
 
 	return 0;
 }
