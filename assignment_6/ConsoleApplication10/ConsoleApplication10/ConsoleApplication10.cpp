@@ -1,6 +1,5 @@
 // ConsoleApplication8.cpp : Defines the entry point for the console application.
 //
-
 #include "stdafx.h"
 #include <iostream>
 #include <fstream>
@@ -10,15 +9,12 @@
 #define nl cout<<endl;
 using namespace std;
 
-void print_vector(vector<double> input)
+void print_vector(vector<long double> input)
 {
-	for (int i = 0; i<input.size(); i++)
-	{
-		cout << input[i] << " ";
-	}
+	for (int i = 0; i<input.size(); i++)		cout << input[i] << " ";
 	cout << endl;
 }
-double abs_max(double a, double b)//return the value of absolute max of given parameters;
+long double abs_max(long double a, long double b)//return the value of absolute max of given parameters;
 {
 	if (abs(a) > abs(b))return abs(a);
 	return abs(b);
@@ -34,50 +30,39 @@ ifstream open_file(string filepath)//open the file with given filepath and retur
 	}
 	return inFile;
 }
-void store_values(vector<vector <double> >input, string filename)
+void store_values(vector<vector <long double> >input, string filename)
 {
 	ofstream ofs;
 	ofs.open(filename);
-	for (int i = 0; i < input.size(); i++)
-	{
-		for (int j = 0; j < input[i].size(); j++)
-		{
-			ofs << to_string(input[i][j]) + " ";
-		}
-		ofs << endl;
-	}
-
+	for (int i = 0; i < input.size(); i++)		for (int j = 0; j < input[i].size(); j++)			ofs << to_string(input[i][j]) + " ";
+	ofs << endl;
 }
-vector<double>hamming_window(vector<double>signals)
+vector<long double>hamming_window(vector<long double>signals)
 {
-	double pi = 3.14159265358979323846;
-	for (int i = 0; i < signals.size(); i++)
-	{
-		signals[i] = signals[i] * (0.54 - 0.46*cos(2 * pi*(i / (signals.size() - 1))));
-	}
+	long double pi = 3.14159;//265358979323846;
+	for (int i = 0; i < signals.size(); i++)		signals[i] = signals[i] * (0.54 - 0.46*cos(2 * pi*((long double)i / (signals.size() - 1))));
 	return signals;
 }
-vector<double> get_Ris(vector<double>signals, long long int p)//gets the Ris from the signals
+vector<long double> get_Ris(vector<long double>signals, long long int p)//gets the Ris from the signals
 {
-	vector<double> Ri;
-	double value = 0;
+	vector<long double> Ri;
+	long double value = 0;
 	for (long long int i = 0; i <= p; i++)
 	{
 		value = 0;
 		for (long long int j = 0; j < signals.size() - i; j++)
 		{
-			value += signals[j] * signals[j + i];//check for the overflows once-----------------------------------------------------------------------------
-
+			value += signals[j] * signals[j + i];
 		}
 		Ri.push_back(value);
 	}
 	return Ri;
 
 }
-vector<double> get_ais(vector<double>signals, vector<double> Ri, long long int p)//phi(k)=R(k)=summationo_over_all_samples(signals(n)*s(n+k)) where n is the sample number
+vector<long double> get_ais(vector<long double>signals, vector<long double> Ri, long long int p)//phi(k)=R(k)=summationo_over_all_samples(signals(n)*s(n+k)) where n is the sample number
 {
-	vector<double>ai(p + 1, 0), E(p + 1, 0), k, bi, output_ai;
-	double value;
+	vector<long double>ai(p + 1, 0), E(p + 1, 0), k, bi, output_ai;
+	long double value;
 	E[0] = Ri[0];
 	k.push_back(-1);//k[0] is invalid
 	bi = ai;
@@ -103,9 +88,9 @@ vector<double> get_ais(vector<double>signals, vector<double> Ri, long long int p
 	}
 	return ai;
 }
-double get_gain_square(vector<double> Ri, vector<double>  ai, int p)
+long double get_gain_square(vector<long double> Ri, vector<long double>  ai, long long int p)
 {
-	double G2 = Ri[0];
+	long double G2 = Ri[0];
 	//	for (int i = 1; i <= p; i++)
 	//	{
 	//		G2 -= ai[1] * Ri[1];  //???????????????????????
@@ -113,9 +98,9 @@ double get_gain_square(vector<double> Ri, vector<double>  ai, int p)
 	return G2;
 
 }
-vector <double> get_cis(vector<double> ai, vector<double> Ri, double G2, int p)
+vector <long double> get_cis(vector<long double> ai, vector<long double> Ri, long double G2, long long int p)
 {
-	vector<double>ci(p + 1, 0);
+	vector<long double>ci(p + 1, 0);
 	double value;
 	ci[0] = log(G2);
 	for (int i = 1; i <= p; i++)
@@ -123,17 +108,17 @@ vector <double> get_cis(vector<double> ai, vector<double> Ri, double G2, int p)
 		value = 0;
 		for (int j = 1; j < i; j++)
 		{
-			value += ((double)j / (double)i)*ci[j] * ai[i - j];
+			value += ((long double)j / (long double)i)*ci[j] * ai[i - j];
 		}
 		ci[i] = ai[i] + value;
 	}
 	return ci;
 
 }
-vector<double> dc_shift_normalize_vac(vector<double> data)//dc shift then voice activity detection and then normalize
+vector<long double> dc_shift_normalize_vac(vector<long double> data)//dc shift then voice activity detection and then normalize
 {
-	vector<double> store_temp;
-	double a = 0, b = 0, counta = 0, countb = 0, dc_shift_bound = 1000, threshold, first_high, last_high, max_v = INT_MIN, min_v = INT_MAX, amplitude = 5000;
+	vector<long double> store_temp;
+	long double a = 0, b = 0, counta = 0, countb = 0, dc_shift_bound = 1000, threshold, first_high, last_high, max_v = INT_MIN, min_v = INT_MAX, amplitude = 5000;
 	for (int i = 0; i < data.size(); i++)//finding the ambient sound for positive side and negative of the signals only at the beginning and ending of the signal (dc_shift_bound number of samples on both sides)
 	{
 		if (data[i] < 0 && (i <= dc_shift_bound || i >= (data.size() - dc_shift_bound)))
@@ -176,22 +161,23 @@ vector<double> dc_shift_normalize_vac(vector<double> data)//dc shift then voice 
 	}
 	for (int i = 0; i < store_temp.size(); i++)//normalize between -A and +A amplitude
 	{
-		if (store_temp[i]>0)store_temp[i] = (amplitude*((double)store_temp[i] / (double)max_v));
-		else store_temp[i] = (-amplitude*((double)store_temp[i] / (double)min_v));
+		if (store_temp[i]>0)store_temp[i] = (amplitude*((long double)store_temp[i] / (long double)max_v));
+		else store_temp[i] = (-amplitude*((long double)store_temp[i] / (long double)min_v));
 	}
 	data = store_temp;
 	return data;
 }
 int _tmain(int argc, _TCHAR* argv[])
 {
+	
 	ifstream infile;
 	ofstream ofs;
 	long long int  p = 12, num_samples = 320;
-	double G2, item;
+	long double G2, item;
 	string folder_path = "vowel_data", filepath, s_filename;//store filename=s_filename
 	vector <string> vowels = { "a", "e", "i", "o", "u" };//all the vowels stored in the vector vowels
-	vector <double> data, ai, ci, Ri, all_data;
-	vector<vector <double> >all_ais, all_cis, all_Ris;
+	vector <long double> data, ai, ci, Ri, all_data;
+	vector<vector <long double> >all_ais, all_cis, all_Ris;
 
 	filepath = "trimmed.txt";
 	infile = open_file(filepath);
@@ -209,8 +195,9 @@ int _tmain(int argc, _TCHAR* argv[])
 	{
 
 		data.assign(all_data.begin() + k * 25 * num_samples / 100, all_data.begin() + k * 25 * num_samples / 100 + num_samples);
-
-		//	data = hamming_window(data);
+	//print_vector(data);
+	//cout << data.size() << endl;
+		data = hamming_window(data);
 		Ri = get_Ris(data, p);//gets the Ris from the signals and store in the vector Ri;
 		ai = get_ais(data, Ri, p);
 		G2 = get_gain_square(Ri, ai, p);
