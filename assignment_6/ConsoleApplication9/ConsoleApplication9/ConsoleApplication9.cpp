@@ -88,7 +88,7 @@ vector<double> get_ais(vector<double>signals, vector<double> Ri, long long int p
 		value = 0;
 		for (long long int j = 1; j < i; j++)
 		{
-			value += ai[i - 1] * Ri[i - j];
+			value += ai[j] * Ri[i - j];
 		}
 		value = (Ri[i] - value) / E[i - 1];
 
@@ -220,12 +220,12 @@ int _tmain(int argc, _TCHAR* argv[])
 				data.push_back(item);
 
 			}
-			all_data = dc_shift_normalize_vac(data);
-			//all_data = data;
+			//all_data = dc_shift_normalize_vac(data);
+			all_data = data;
 			for (int k = 0; k < 5; k++)
 			{
 				data.assign(all_data.begin() + k * 25 * num_samples / 100, all_data.begin() + k * 25 * num_samples / 100 + num_samples);
-			//	data = hamming_window(data);
+				//data = hamming_window(data);
 				Ri = get_Ris(data, p);//gets the Ris from the signals and store in the vector Ri;
 				////for (int i = 0; i < Ri.size(); i++)cout << "Ri:" << Ri[i] << "\t";
 				//cout << endl;
