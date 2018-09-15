@@ -39,7 +39,7 @@ void store_values(vector<vector <long double> >input, string filename)
 }
 vector<long double>hamming_window(vector<long double>signals)
 {
-	long double pi = 3.14159;//265358979323846;
+	long double pi = 3.14159265358979323846;
 	for (int i = 0; i < signals.size(); i++)		signals[i] = signals[i] * (0.54 - 0.46*cos(2 * pi*((long double)i / (signals.size() - 1))));
 	return signals;
 }
@@ -193,7 +193,6 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	for (int k = 0; k < 5; k++)
 	{
-
 		data.assign(all_data.begin() + k * 25 * num_samples / 100, all_data.begin() + k * 25 * num_samples / 100 + num_samples);
 	//print_vector(data);
 	//cout << data.size() << endl;
@@ -219,9 +218,6 @@ int _tmain(int argc, _TCHAR* argv[])
 	all_data.clear();
 	all_ais.clear();
 	all_cis.clear();
-
-
-
 	return 0;
 }
 

@@ -197,8 +197,8 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	ifstream infile;
 	ofstream ofs;
-	long long int item,p=12,num_samples=320;
-	long double G2;
+	long long int p=12,num_samples=320;
+	long double G2,item;
 	string folder_path = "vowel_data",filepath,s_filename;//store filename=s_filename
 	vector <string> vowels = { "a", "e", "i", "o", "u" };//all the vowels stored in the vector vowels
 	vector <long double> data, ai, ci, Ri, all_data;
@@ -208,6 +208,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		for ( int j = 0; j < vowels.size(); j++)
 		{
 			filepath = folder_path + "/150101010_" + vowels[j] + "_" + to_string(i + 1) + ".txt";
+			//filepath="trimmed.txt";
 			infile = open_file(filepath);
 			cout << filepath << endl;
 			while (!infile.eof())//storing input file in store vector
