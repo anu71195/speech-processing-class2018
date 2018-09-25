@@ -1,4 +1,4 @@
-// ConsoleApplication12.cpp : Defines the entry point for the console application.
+// ConsoleApplication13.cpp : Defines the entry point for the console application.
 //
 
 #include "stdafx.h"
@@ -12,7 +12,6 @@
 #include <algorithm>
 #define nl cout<<endl;
 using namespace std;
-
 
 void print_vector(vector<double>input)
 {
@@ -81,62 +80,48 @@ double tokhura(vector<double> a, vector<double> b, vector <double> weights)//fin
 	}
 	return distance;
 }
-double get_max(vector<vector<double> > X)
-{
-	double max_val=0;
-	for (int i = 0; i < X.size(); i++)
-	{
-		for (int j = 0; j < X[i].size(); j++)
-		{
-			max_val = max(max_val,X[i][j]);
-		}
-	}
-	return max_val;
-}
-double get_min(vector<vector<double> > X)
-{
-	double min_val = numeric_limits<double>::max();
-	for (int i = 0; i < X.size(); i++)
-	{
-		for (int j = 0; j < X[i].size(); j++)
-		{
-			min_val = min(min_val, X[i][j]);
-		}
-	}
-	return min_val;
-}
 double find_distortion(vector<vector<double> > X, vector<int>  Y, vector< vector< double> >  V, vector<double>tokura_weights)
 {
 	double distortion = 0;
 	for (int i = 0; i < X.size(); i++)
 	{
-		distortion+=tokhura(X[i], V[Y[i]], tokura_weights);
+		distortion += tokhura(X[i], V[Y[i]], tokura_weights);
 	}
 	distortion = distortion / X.size();
 	return distortion;
 }
-void k_means(vector<vector<double> > X, int k, vector<double>tokura_weights)
+vector <double> get_centroid(vector <vector <double > > X)
 {
-//	double max_val = get_max(X);
-	//double min_val = get_min(X);
-
-	vector < vector<double> > V;
-	vector<int> Y(X.size(),0);
-	double min_dist = numeric_limits<double>::max(), dist, distortion = numeric_limits<double>::max(), old_distortion = numeric_limits<double>::max();
-	int assigned_class = -1,max_iterations=100;
-	for(int i=0;i<k;i++)//initalization of the centroids
+	vector <double> output(X[0].size(),0);
+	for (int i = 0; i < X.size(); i++)
 	{
-		V.push_back(X[(i/(k-1))*(X.size()-1)]);
+		for (int j = 0; j < X[0].size(); j++)
+		{
+			output[j] += X[i][j];
+		}
 	}
+	for (int j = 0; j < output.size(); j++)
+	{
+		output[j] = output[j] / (double)X.size();
+	}
+	return output;
+}
+vector<int>  k_means(vector<vector<double> > X, vector< vector<double> > &V, vector<double>tokura_weights)
+{
+	//	double max_val = get_max(X);
+	//double min_val = get_min(X);
+	vector<int> Y(X.size(), 0);
+	double min_dist = numeric_limits<double>::max(), dist, distortion = numeric_limits<double>::max(), old_distortion = numeric_limits<double>::max();
+	int assigned_class = -1, max_iterations = 100;
 
 	//classification 
 	for (int iter = 0; iter < max_iterations; iter++)
 	{
-		cout << "iterations number="<<iter << endl;
+		cout << "iterations number=" << iter << endl;
 		old_distortion = distortion;
 		for (int i = 0; i < X.size(); i++)
 		{
-			for (int j = 0; j < k; j++)
+			for (int j = 0; j < V.size(); j++)
 			{
 				dist = tokhura(X[i], V[j], tokura_weights);
 				if (min_dist>dist)
@@ -172,17 +157,60 @@ void k_means(vector<vector<double> > X, int k, vector<double>tokura_weights)
 			}
 			if (count)V[i] = temp;
 		}
-		distortion=	find_distortion(X,Y,V,tokura_weights);
-		cout << "old distortion="<<old_distortion << endl;
+		distortion = find_distortion(X, Y, V, tokura_weights);
+		cout << "old distortion=" << old_distortion << endl;
 		cout << "new distortion=" << distortion << endl;
-		cout << "change in distortion="<<old_distortion - distortion << endl;
+		cout << "change in distortion=" << old_distortion - distortion << endl;
 		if (abs(old_distortion - distortion) < 0.00000000000001)
 		{
 			break;
-		}	
+		}
 		nl
-		
+
 	}
+	print_vector(Y);
+	return Y;
+
+}
+vector < vector  <double> >split_codebook(vector <vector <double> > V, double epsilon)
+{
+	vector <vector<double> >output;
+	vector <double> temp;
+	for (int i = 0; i < V.size(); i++)
+	{
+		for (int j = 0; j < V[i].size(); j++)
+		{
+			temp.push_back(V[i][j] + epsilon);
+		}
+		output.push_back(temp);
+		temp.clear();
+		for (int j = 0; j < V[i].size(); j++)
+		{
+			temp.push_back(V[i][j] - epsilon);
+		}
+		output.push_back(temp);
+		temp.clear();
+	}
+	return output;
+}
+void LBG(vector <vector <double >  > X,int k,vector <double> tokura_weights,double epsilon)
+{
+	vector< vector<double> > V;
+	vector <int> Y;
+	int num_clusters = 0;
+	//initialization
+	V.push_back(get_centroid(X));
+	print_matrix(V);
+
+	while (V.size() < k)
+	{
+
+		V = split_codebook(V, epsilon);
+		print_matrix(V);
+		Y = k_means(X, V, tokura_weights);
+		print_matrix(V);
+	}
+	print_matrix(V);
 	print_vector(Y);
 
 }
@@ -192,8 +220,9 @@ int _tmain(int argc, _TCHAR* argv[])
 	vector<double>tokura_weights = { 1, 3, 7, 13, 19, 22, 25, 33, 42, 50, 56, 61 };
 	string filename = "Universe.csv";
 	int k = 8;
+	double epsilon = 0.03;
 	X = get_input(filename);
-	k_means(X,k,tokura_weights);
+	LBG(X,k,tokura_weights,epsilon);
 	return 0;
 }
 
