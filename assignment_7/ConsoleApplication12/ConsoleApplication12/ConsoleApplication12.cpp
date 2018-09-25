@@ -1,0 +1,203 @@
+// ConsoleApplication12.cpp : Defines the entry point for the console application.
+//
+
+#include "stdafx.h"
+#include  <iostream>
+#include  <fstream>
+#include  <string>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+#include <limits>
+#include <algorithm>
+#define nl cout<<endl;
+using namespace std;
+
+
+void print_vector(vector<double>input)
+{
+	for (int i = 0; i < input.size(); i++)
+	{
+		cout << input[i] << " ";
+	}
+	nl
+}
+void print_vector(vector<int>input)
+{
+	for (int i = 0; i < input.size(); i++)
+	{
+		cout << input[i] << " ";
+	}
+	nl
+}
+void print_matrix(vector <vector <double> > input)
+{
+	for (int i = 0; i < input.size(); i++)
+	{
+		print_vector(input[i]);
+	}
+	cout << endl;
+}
+double doubleRand() {
+	return double(rand()) / (double(RAND_MAX) + 1.0);
+}
+vector<double> parse_line(string line, char delimit)
+{
+	int first = 0;
+	vector < double>output;
+	for (int i = 0; i < line.size(); i++)
+	{
+		if (line[i] == delimit)
+		{
+			output.push_back(stod(line.substr(first, i - first)));
+			first = i + 1;
+		}
+	}
+	output.push_back(stod(line.substr(first, line.size() - first)));
+	return output;
+}
+vector <vector <double > > get_input(string filename)
+{
+	vector<vector<double> > X;
+	ifstream ifs(filename);
+	string line;
+	while (ifs.good())
+	{
+		vector<double>temp_data;
+		getline(ifs, line, '\n');
+		if (line.size() == 0)break;
+		temp_data = parse_line(line, ',');
+		X.push_back(temp_data);
+	}
+	return X;
+}
+double tokhura(vector<double> a, vector<double> b, vector <double> weights)//finding tokhura's distance
+{
+	double distance = 0;
+	vector <long double> vec_distance;
+	for (int i = 0; i < a.size(); i++)
+	{
+		distance += weights[i] * (a[i] - b[i])*(a[i] - b[i]);//finding distance;	
+	}
+	return distance;
+}
+double get_max(vector<vector<double> > X)
+{
+	double max_val=0;
+	for (int i = 0; i < X.size(); i++)
+	{
+		for (int j = 0; j < X[i].size(); j++)
+		{
+			max_val = max(max_val,X[i][j]);
+		}
+	}
+	return max_val;
+}
+double get_min(vector<vector<double> > X)
+{
+	double min_val = numeric_limits<double>::max();
+	for (int i = 0; i < X.size(); i++)
+	{
+		for (int j = 0; j < X[i].size(); j++)
+		{
+			min_val = min(min_val, X[i][j]);
+		}
+	}
+	return min_val;
+}
+double find_distortion(vector<vector<double> > X, vector<int>  Y, vector< vector< double> >  V, vector<double>tokura_weights)
+{
+	double distortion = 0;
+	for (int i = 0; i < X.size(); i++)
+	{
+		distortion+=tokhura(X[i], V[Y[i]], tokura_weights);
+	}
+	distortion = distortion / X.size();
+	return distortion;
+}
+void k_means(vector<vector<double> > X, int k, vector<double>tokura_weights)
+{
+//	double max_val = get_max(X);
+	//double min_val = get_min(X);
+
+	vector < vector<double> > V;
+	vector<int> Y(X.size(),0);
+	double min_dist = numeric_limits<double>::max(), dist, distortion = numeric_limits<double>::max(), old_distortion = numeric_limits<double>::max();
+	int assigned_class = -1,max_iterations=100;
+	for(int i=0;i<k;i++)//initalization of the centroids
+	{
+		V.push_back(X[(i/(k-1))*(X.size()-1)]);
+	}
+
+	//classification 
+	for (int iter = 0; iter < max_iterations; iter++)
+	{
+		cout << "iterations number="<<iter << endl;
+		old_distortion = distortion;
+		for (int i = 0; i < X.size(); i++)
+		{
+			for (int j = 0; j < k; j++)
+			{
+				dist = tokhura(X[i], V[j], tokura_weights);
+				if (min_dist>dist)
+				{
+					min_dist = dist;
+					assigned_class = j;
+				}
+			}
+			min_dist = numeric_limits<double>::max();
+			Y[i] = assigned_class;
+		}
+
+		//finding centroids;
+		for (int i = 0; i < V.size(); i++)
+		{
+			vector<double>temp(V[0].size(), 0);
+			int count = 0;
+			for (int j = 0; j < X.size(); j++)
+			{
+				if (Y[j] == i)
+				{
+					count++;
+					for (int k = 0; k < X[0].size(); k++)
+					{
+						temp[k] += X[j][k];
+					}
+				}
+			}
+			for (int k = 0; k < X[0].size(); k++)
+			{
+				if (count == 0)break;
+				temp[k] = temp[k] / (double)count;
+			}
+			if (count)V[i] = temp;
+		}
+		distortion=	find_distortion(X,Y,V,tokura_weights);
+		cout << "old distortion="<<old_distortion << endl;
+		cout << "new distortion=" << distortion << endl;
+		cout << "change in distortion="<<old_distortion - distortion << endl;
+		if (abs(old_distortion - distortion) < 0.00000000000001)
+		{
+			break;
+		}	
+		nl
+		
+	}
+	print_vector(Y);
+
+}
+int _tmain(int argc, _TCHAR* argv[])
+{
+	vector<vector<double> > X;
+	vector<double>tokura_weights = { 1, 3, 7, 13, 19, 22, 25, 33, 42, 50, 56, 61 };
+	string filename = "Universe.csv";
+	string line;
+	ifstream ifs (filename);
+	int k = 8,features,datapoints;
+	X = get_input(filename);
+	features = X[0].size();
+	datapoints = X.size();
+	k_means(X,k,tokura_weights);
+	return 0;
+}
+
