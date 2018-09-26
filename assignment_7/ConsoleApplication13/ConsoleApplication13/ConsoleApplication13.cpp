@@ -13,6 +13,18 @@
 #define nl cout<<endl;
 using namespace std;
 
+
+ifstream open_file(string filepath)//open the file with given filepath and returns the file handle
+{
+	ifstream inFile;
+	inFile.open(filepath);
+	if (inFile.fail())
+	{
+		cerr << "Error opening file" << endl;
+		exit(1);
+	}
+	return inFile;
+}
 void print_vector(vector<double>input)
 {
 	for (int i = 0; i < input.size(); i++)
@@ -55,7 +67,7 @@ vector<double> parse_line(string line, char delimit)
 	output.push_back(stod(line.substr(first, line.size() - first)));
 	return output;
 }
-vector <vector <double > > get_input(string filename)
+vector <vector <double > > get_input_csv(string filename)
 {
 	vector<vector<double> > X;
 	ifstream ifs(filename);
@@ -67,6 +79,29 @@ vector <vector <double > > get_input(string filename)
 		if (line.size() == 0)break;
 		temp_data = parse_line(line, ',');
 		X.push_back(temp_data);
+	}
+	return X;
+}
+vector <vector <double > > get_input_txt(string filename)
+{
+	vector <vector <double> > X;
+	vector <double> temp;
+	ifstream infile;
+	infile = open_file(filename);
+	double item;
+	int count = 0;
+	while (!infile.eof())//storing input file in store vector
+	{
+		infile >> item;
+		temp.push_back(item);
+		count++;
+		if (count == 13)
+		{
+			temp.erase(temp.begin());
+			X.push_back(temp);
+			temp.clear();
+			count = 0;
+		}
 	}
 	return X;
 }
@@ -218,10 +253,12 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	vector<vector<double> > X;
 	vector<double>tokura_weights = { 1, 3, 7, 13, 19, 22, 25, 33, 42, 50, 56, 61 };
+	//string filename = "My_Universe.txt";
 	string filename = "Universe.csv";
 	int k = 8;
 	double epsilon = 0.03;
-	X = get_input(filename);
+	//X = get_input_csv(filename);
+	X = get_input_txt(filename);
 	LBG(X,k,tokura_weights,epsilon);
 	return 0;
 }
