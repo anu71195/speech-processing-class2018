@@ -132,12 +132,35 @@ void backward_initialization(vector<vector<lld> > &beta,ll N)
 {
 	beta.push_back(vector<lld> (N,1));
 }
+void backward_induction(vector<vector<lld> > & beta, vector<vector<lld> > A, vector < vector < lld> > B, vector <lld> O, ll T)
+{
+	vector<lld> b_temp;
+	lld temp = 0;
+	for (ll t = T - 1; t > 0; t--)
+	{
+		b_temp.clear();
+		for (ll i = 0; i < A.size(); i++)
+		{
+			temp = 0;
+			for (ll j = 0; j < A.size(); j++)
+			{
+				temp += A[i][j] * B[j][O[t] - 1] * beta[0][j];
+			}
+			b_temp.push_back(temp);
+		}
+		beta.insert(beta.begin(), b_temp);
+	}
+}
 void backward_procedure(vector < vector <lld> > A, vector < vector < lld> > B,  vector <lld> O, ll T)
 {
 	vector<vector<lld> > beta;
 	//initialization step
 	backward_initialization(beta,A.size());
 	
+	//induction step
+	backward_induction(beta,A,B,O,T);
+	
+
 }
 void wrapper(vector < vector <lld> > A, vector < vector < lld> > B, vector <lld> pi_matrix, vector <lld> O, ll T)
 {
