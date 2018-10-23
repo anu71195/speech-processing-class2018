@@ -162,10 +162,88 @@ void backward_procedure(vector < vector <lld> > A, vector < vector < lld> > B,  
 	
 
 }
+void viterbi_initialization(vector<vector<lld> > &delta, vector< vector < lld> > & psi, vector<vector<lld> > b,vector<lld> pi_matrix,vector<lld> O)
+{
+	vector<lld> temp;
+	for (int i = 0; i < pi_matrix.size(); i++)		temp.push_back(pi_matrix[i]*b[i][O[0]-1]);
+	delta.push_back(temp), psi.push_back(vector<lld> (pi_matrix.size(),0));
+}
+void viterbi_induction(vector<vector<lld> > &delta, vector < vector < lld> >& psi, vector < vector <lld> > A, vector < vector < lld> > b, vector<lld>O, ll T)
+{
+	vector<lld> delta_temp,psi_temp;
+	lld temp=INT_MIN,temp2;
+	ll index;
+	for (ll t = 1; t < T; t++)
+	{
+		delta_temp.clear(),psi_temp.clear();
+		for (ll j = 0; j < A.size(); j++)
+		{
+			temp = INT_MIN;
+			
+			for (ll i = 0; i < A.size(); i++)
+			{
+				temp2 = delta[delta.size() - 1][i] * A[i][j];
+				if (temp < temp2)
+				{
+					temp = temp2,	index = i;
+					
+				}
+				
+			}
+			delta_temp.push_back(temp*b[j][O[t] - 1]);	
+			psi_temp.push_back(index);
+		}
+		delta.push_back(delta_temp);
+		psi.push_back(psi_temp);
+	}
+}
+void viterbi_termination(vector< vector< lld> > delta,lld &p_star,lld &q_star)
+{
+	p_star = INT_MIN;
+	for (int i = 0; i < delta[delta.size() - 1].size(); i++)
+	{
+		if (p_star < delta[delta.size() - 1][i])
+		{
+			p_star = delta[delta.size()-1][i];
+			q_star = i;
+		}
+	}
+}
+vector<lld> viterbi_backtracking(vector<vector<lld> > psi, lld q_star)
+{
+	vector< lld > output;
+	for (int t = psi.size() - 2; t >= 0; t--)
+	{
+		output.insert(output.begin(), q_star);
+		q_star = psi[t+1][q_star];
+	}
+	output.insert(output.begin(), q_star);
+	return output;
+}
+void viterbi(vector<vector<lld> > A,vector < vector <lld> > b, vector<lld> pi_matrix, vector<lld> O, ll T)
+{
+	vector<vector<lld> > delta, psi;
+	vector<lld> state_sequence;
+	lld p_star, q_star;
+	//initialization
+	viterbi_initialization(delta,psi,b,pi_matrix,O);
+	
+	//induction step
+	viterbi_induction(delta,psi,A,b,O,T);
+	
+	//termination step
+	viterbi_termination(delta,p_star,q_star);
+
+	
+	//backtracking step
+	state_sequence=viterbi_backtracking(psi,q_star);
+	print_vector(state_sequence);
+}
 void wrapper(vector < vector <lld> > A, vector < vector < lld> > B, vector <lld> pi_matrix, vector <lld> O, ll T)
 {
 	forward_procedure(A, B, pi_matrix, O, T);
 	backward_procedure(A, B, O, T);
+	viterbi(A,B,pi_matrix,O,T);
 }
 int _tmain(int argc, _TCHAR* argv[])
 {
