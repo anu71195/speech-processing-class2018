@@ -82,6 +82,39 @@ vector<lld> get_observation_sequence(string filename)//getting observation seque
 {
 	return get_vector_file_input(filename);
 }
+void store_values(lld input, string filename)//store thevector in the file given by the filename
+{
+	ofstream ofs;
+	ofs.open(filename);
+	ofs << to_string(input);
+	ofs << endl;
+	
+
+}
+void store_values(vector <lld> input, string filename)//store thevector in the file given by the filename
+{
+	ofstream ofs;
+	ofs.open(filename);
+	for (int i = 0; i < input.size(); i++)
+	{
+		ofs << to_string(input[i]);
+		ofs << endl;
+	}
+
+}
+void store_values(vector<vector < lld> >input, string filename)//STORES MATRIX IN THE FILE GIVEN BY THENAME filename
+{
+	ofstream ofs;
+	ofs.open(filename);
+	for (int i = 0; i < input.size(); i++)
+	{
+		for (int j = 0; j < input[i].size(); j++)
+		{
+			ofs << to_string(input[i][j]) + " ";
+		}ofs << endl;
+	}
+
+}
 void forward_initialization(vector<vector<lld> >&alpha,vector < lld> pi_matrix, vector <vector <lld> > B,vector<lld> O)//initialization of forward procedure
 {
 	vector < lld> temp;	
@@ -128,6 +161,8 @@ void forward_procedure(vector < vector <lld> > A, vector < vector < lld> > B, ve
 	cout << "P(O/lambda) = " << P_O_lambda; nl nl
 	cout << "alpha matrix is"; nl;
 	print_matrix(alpha);
+	store_values(P_O_lambda,"POlambda.txt");
+	store_values(alpha, "alpha.txt");
 }
 void backward_initialization(vector<vector<lld> > &beta,ll N)//initialization of backward procedure
 {
@@ -162,6 +197,7 @@ void backward_procedure(vector < vector <lld> > A, vector < vector < lld> > B,  
 	backward_induction(beta,A,B,O,T);
 	cout << "alpha matrix is"; nl;
 	print_matrix(beta);
+	store_values(beta, "beta.txt");
 	
 
 }
@@ -245,6 +281,10 @@ void viterbi(vector<vector<lld> > A,vector < vector <lld> > b, vector<lld> pi_ma
 	cout << "state sequence is"; nl
 	print_vector(state_sequence);
 	cout << "p* = " << p_star << endl;
+	store_values(delta, "delta.txt");
+	store_values(psi,"psi.txt");
+	store_values(state_sequence, "state_sequence.txt");
+	store_values(p_star, "p_star.txt");
 }
 void wrapper(vector < vector <lld> > A, vector < vector < lld> > B, vector <lld> pi_matrix, vector <lld> O, ll T)
 {
