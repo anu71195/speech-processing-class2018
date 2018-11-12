@@ -496,11 +496,9 @@ void wrapper(vector < vector <lld> >& A, vector < vector < lld> >& B, vector <ll
 		viterbi(A, B, pi_matrix, O, T, delta, psi, state_sequence, p_star, q_star);//running viterbi algorithm		
 		
 		
-		
-		
 		EM(zhi, A, B, alpha, beta, gamma, O, T, pi_matrix);
 		//print_matrix(zhi);
-		//print_matrix(state_sequence);
+		print_matrix(state_sequence);
 		cout << P_O_lambda << endl;
 		
 	}
