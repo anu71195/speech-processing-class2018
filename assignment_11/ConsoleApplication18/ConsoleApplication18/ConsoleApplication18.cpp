@@ -16,7 +16,7 @@
 #define lld long double
 
 using namespace std;
-
+vector<string> filename_vector;
 int iteration_num,avg_num;
 
 lld vector_sum(vector<lld>input)
@@ -61,6 +61,12 @@ vector<lld >addone(vector<lld >input)
 {
 	for (int i = 0; i < input.size(); i++)input[i]++;
 	return input;
+}
+
+bool isfileexists(const string & filename)
+{
+	ifstream ifile(filename.c_str());
+	return (bool)ifile;
 }
 ifstream open_file(string filepath)//open the file with given filepath and returns the file handle
 {
@@ -110,6 +116,8 @@ vector <lld> get_vector_file_input(string filename)//getting vector from file
 	vector <lld> output;
 	lld item;
 	ifstream infile = open_file(filename);
+	struct stat buffer;
+
 	while (!infile.eof())
 	{
 		infile >> item;
@@ -117,7 +125,23 @@ vector <lld> get_vector_file_input(string filename)//getting vector from file
 	}
 	return output;
 }
-vector < vector <lld> >  get_A(string filename, ll N)//getting transition matrix from input file initial model
+
+vector <lld> get_vector_file_input(string filename,int & flag)//getting vector from file
+{
+	vector <lld> output;
+	lld item;
+	
+	
+	flag = isfileexists(filename);
+	if (flag == 0)return output;
+	ifstream infile = open_file(filename);
+	while (!infile.eof())
+	{
+		infile >> item;
+		output.push_back(item);
+	}
+	return output;
+}vector < vector <lld> >  get_A(string filename, ll N)//getting transition matrix from input file initial model
 {
 	return get_matrix_file_input(filename, N);
 }
@@ -446,13 +470,14 @@ vector < vector <lld> > create_universe(ll  &iterations, ll  &nframes, lld &p, l
 	string folder_path = "data", filepath;//store filename=s_filename
 	vector <lld> data, ai, ci, Ri, all_data, temp, digits = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 	vector<vector <lld> >all_ais, all_cis, all_Ris, input_cis, universe;
-
+	filename_vector.clear();
 	for (ll i = 0+offset; i < iterations+offset; i++)
 	{
 		for (ll j = 0; j < digits.size(); j++)
 		{
 
 			filepath = folder_path + "/150101010_" + to_string((ll)digits[j]) + "_" + to_string(i + 1) + ".txt";
+			filename_vector.push_back(filepath);
 			cout << filepath << endl;
 			infile = open_file(filepath);
 
@@ -1339,8 +1364,10 @@ void testing(vector <vector<vector<lld> > > &all_A, vector <vector<vector<lld> >
 	ll digit;
 	for (ll i = 0; i < input_observations.size(); i++)
 	{
+
 		pi_matrix = get_pi_matrix(file_pi_matrix);//getting state matrix from input file initial mod
 		digit=classification(all_A,all_B,pi_matrix,input_observations[i],digits,T);
+		cout << filename_vector[i] << endl;
 		cout << "digit classified is " << digit << endl;
 	}
 }
@@ -1350,6 +1377,7 @@ void outer_wrapper2(vector<vector<lld> > & X, vector<vector<lld> > & V, vector<v
 	
 	
 	vector<vector<lld> > universe;
+	Y_all.clear();
 	for (int i = 0; i < X.size(); i++)Y.push_back(-1);
 	universe = create_universe(iterations, nframes, p, num_samples, offset);
 	X = universe;
@@ -1384,6 +1412,80 @@ void outer_wrapper2(vector<vector<lld> > & X, vector<vector<lld> > & V, vector<v
 	//LBG(V, Y_all, Y, universe, k, tokura_weights, epsilon, nframes, threshold);//run LBG algorithm on the dataset
 
 }
+void outer_wrapper3(vector<vector<lld> > & X, vector<vector<lld> > & V, vector<vector<lld> > & Y_all, vector<lld>&tokura_weights, vector<ll>&Y, lld &p, lld &num_samples, lld&epsilon, ll &iterations, ll &nframes, ll &k, lld &threshold, ll offset)
+{
+
+	lld min_dist = numeric_limits<lld>::max(), dist;
+	ll  num_clusters = 0, assigned_class = -1;
+	Y_all.clear();
+	vector<lld > temp;
+	cout << "isze of X is " << X.size() << endl;
+	cout << "isze of V is" << V.size() << endl;
+	for (ll i = 0; i < X.size(); i++)
+	{
+		//cout << "is is" << i << endl;
+		for (ll j = 0; j < V.size(); j++)
+		{
+			//cout << j << " ";
+			dist = tokhura(X[i], V[j], tokura_weights);//finding tokhura's distance
+			//cout << " aaaaaaaaa";
+			if (min_dist>dist)
+			{
+				min_dist = dist;//finding the least tokhura's distance
+				assigned_class = j;
+			}
+		}
+		min_dist = numeric_limits<lld>::max();
+		//cout << " aaaaaaaaa";
+		//Y[i] = assigned_class;//using the distance cluster it to one of the class which has min distance
+		//cout << " aaaaaaaaa";
+		temp.push_back(assigned_class);
+		if (temp.size() == nframes)			Y_all.push_back(temp), temp.clear();
+
+	}
+	cout << "Here";
+	//LBG(V, Y_all, Y, universe, k, tokura
+
+	
+
+}
+vector<vector <lld> > recording_module_process(ll num_samples,ll nframes,ll p,string filename,int & flag)
+{
+	
+		vector<lld>data, all_data;
+		
+		data = get_vector_file_input(filename,flag);
+		vector<vector<lld> > dummy;
+		if (flag == 0)return dummy;
+		data = dc_shift_normalize_vac(data);//does dc shift, normalize the data and do voice activity detecting
+		all_data = data;
+		lld G2, item;
+		vector <lld>  ai, ci, Ri, temp, digits = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+		vector<vector <lld> >all_ais, all_cis, all_Ris, input_cis, universe;
+		for (ll k = 0; k < nframes; k++)
+		{
+			//cout <<k<<" "<< all_data.size() << " " << k * 25 * num_samples / 100 + num_samples << endl;
+			data.assign(all_data.begin() + k * 25 * num_samples / 100, all_data.begin() + k * 25 * num_samples / 100 + num_samples);//takes num_samples at a time and then shift 25% subsequently while taking data
+			data = hamming_window(data);//apply hamming window on the data
+			Ri = get_Ris(data, p);//gets the Ris from the signals and store in the vector Ri;
+			ai = get_ais(data, Ri, p);
+			G2 = get_gain_square(Ri, ai, p);
+			ci = get_cis(ai, Ri, G2, p);
+			universe.push_back(ci);
+			//all_ais.push_back(ai);
+			//all_cis.push_back(ci);
+			//all_Ris.push_back(Ri);
+			data.clear();
+		}
+		return universe;
+	
+}
+void record_sound()
+{
+	cout << "NOTE:- It is expected that input at the beginning and ending has ambient sound of about 1 second" << endl << endl;
+	cout << "The output of the recorded sound will be stored in out.wav and out.txt for sound and its numerical samples respectively" << endl << endl;
+	system("Recording_Module.exe 4 out.wav out.txt");
+}
 int _tmain(ll  argc, _TCHAR* argv[])
 {
 	
@@ -1394,7 +1496,7 @@ int _tmain(ll  argc, _TCHAR* argv[])
 	vector<ll >training_Y,testing_Y;
 	string file_A_matrix = "data/A_matrix_initialmodel.txt", file_B_matrix = "data/B_matrix_initialmodel.txt", file_pi_matrix = "data/pi_matrix_initialmodel.txt";
 	lld vector_length = 12, num_samples_perframe = 320, epsilon = 0.03,threshold=0.1;//vector length is p
-	ll  iterations_perdigit = 20, nframes = 40, k = 32, T=nframes, N_states = 5, N_codebook = 32,old_universe=0,train=1,test=1;
+	ll  iterations_perdigit = 20, nframes = 40, k = 32, T=nframes, N_states = 5, N_codebook = 32,old_universe=0,train=1,test=1,option;
 	
 	get_universe_and_observation_sequence(training_universe, training_V, Y_all, tokura_weights, training_Y, vector_length, num_samples_perframe, epsilon, iterations_perdigit, nframes, k, threshold, old_universe, 0);
 	cout << " training universe is " << training_universe.size() << endl;
@@ -1403,13 +1505,61 @@ int _tmain(ll  argc, _TCHAR* argv[])
 		create_initial_AB(all_A, all_B, digits, N_states, N_codebook, file_A_matrix, file_B_matrix);
 		training(all_A, all_B, Y_all, pi_matrix, digits, T, file_pi_matrix);
 	}
-	if (test)
+	while (1)
 	{
-		ll iterations_perdigit = 10;
-		cout << training_V.size() << endl;
-		outer_wrapper2(testing_universe, training_V, input_observations, tokura_weights, testing_Y, vector_length, num_samples_perframe, epsilon, iterations_perdigit, nframes, k, threshold, 20);
-		print_matrix(input_observations);
-		testing(all_A, all_B,input_observations, pi_matrix, digits, T, file_pi_matrix);
+		cout << "Press 0 to stop the algorithm | ";
+		cout << "Press 1 to test against testing data already in the file | ";
+		cout << "Press 2 to give recording module | ";
+		cout << "Press 3 to give filename";
+		cin >> option;
+		if (option == 0)break;
+		if (test&&option==1)
+		{
+			ll iterations_perdigit = 10;
+			cout << training_V.size() << endl;
+			outer_wrapper2(testing_universe, training_V, input_observations, tokura_weights, testing_Y, vector_length, num_samples_perframe, epsilon, iterations_perdigit, nframes, k, threshold, 20);
+			print_matrix(input_observations);
+			testing(all_A, all_B, input_observations, pi_matrix, digits, T, file_pi_matrix);
+		}
+		else if (option == 2||option==3)
+		{
+			string filename;
+			if (option == 2)
+			{
+				record_sound();
+				 filename = "out.txt";
+			}
+			else if (option == 3)
+			{
+
+				cin >> filename;
+			}
+			else
+			{
+				cout << "WRONG OPTION CHOOSE AGAIN" << endl;
+				continue;
+			}
+			filename_vector.clear();
+			filename_vector.push_back(filename);
+			
+			vector<vector <lld> > universe;
+			int flag;
+			universe=recording_module_process(num_samples_perframe,nframes,vector_length,filename,flag);
+			if (flag == 0)
+			{
+				cout << "WRONG FILENAME TRY AGAIN" << endl;
+				continue;
+			}
+			outer_wrapper3(universe, training_V, input_observations, tokura_weights, testing_Y, vector_length, num_samples_perframe, epsilon, iterations_perdigit, nframes, k, threshold, 20);
+		
+			print_matrix(input_observations);
+			testing(all_A, all_B, input_observations, pi_matrix, digits, T, file_pi_matrix);
+		}
+		else
+		{
+			cout << "WRONG OPTION CHOOSE AGAIN" << endl;
+		}
+		
 	}
 	
 	for (int i = 0; i < all_A.size(); i++)
